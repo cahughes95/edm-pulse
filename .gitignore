@@ -1,0 +1,14 @@
+/node_modules
+/.next
+/out
+dist/
+npm-debug.log*
+yarn-*.log
+.DS_Store
+*.zip
+.env
+.env.*
+!.env.example
+.env.local
+.env.production
+.env.development

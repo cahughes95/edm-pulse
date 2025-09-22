@@ -1,0 +1,7 @@
+@tailwind base; @tailwind components; @tailwind utilities;
+:root { --bg:#0b0b0f; --card:#111217; --muted:#9aa3af; }
+html,body{background:var(--bg); color:#e5e7eb}
+.container{@apply max-w-6xl mx-auto px-4}
+.card{@apply bg-[var(--card)] rounded-2xl p-4 shadow-lg border border-white/5}
+.badge{@apply inline-flex items-center rounded-full border border-white/10 px-2 py-0.5 text-xs text-gray-200}
+.link{@apply underline decoration-brand-500/50 underline-offset-4 hover:text-brand-300}
