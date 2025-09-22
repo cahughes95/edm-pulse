@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import './globals.css'
+import '../styles/globals.css'
 
 const siteName = process.env.SITE_NAME || 'EDM Pulse'
 const siteUrl = process.env.SITE_URL || 'https://www.edm-pulse.com'
