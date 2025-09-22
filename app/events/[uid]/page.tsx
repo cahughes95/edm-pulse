@@ -24,7 +24,7 @@ export default async function EventPage({ params }: Props) {
           {e.genres?.map(g => <span key={g} className="badge">{g}</span>)}
           {e.age && <span className="badge">{e.age}</span>}
         </div>
-        {e.description && <p className="mt-4 text-gray-300">{e.description}</p>}
+        {e.summary && <p className="mt-4 text-gray-300">{e.summary}</p>}
       </div>
       <aside className="space-y-4">
         <div className="card">
