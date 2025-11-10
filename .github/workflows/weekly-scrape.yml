@@ -1,20 +1,51 @@
 name: weekly-scrape
+
 on:
   schedule:
-    - cron: "0 17 * * MON"   # ~09:00 Los Angeles during Standard Time
+    - cron: "0 17 * * MON"
   workflow_dispatch: {}
+
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with:
+          python-version: "3.11"
+
+      - name: Debug DB host & DNS (temporary)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          python - <<'PY'
+          import os, urllib.parse, socket, sys
+          u = os.environ.get("DATABASE_URL")
+          if not u:
+              print("DATABASE_URL missing in runner environment", file=sys.stderr)
+              sys.exit(2)
+          p = urllib.parse.urlparse(u)
+          print("Parsed scheme:", p.scheme)
+          print("Parsed username:", p.username)
+          print("Parsed host:", p.hostname)
+          print("Parsed port:", p.port)
+          try:
+              ai = socket.getaddrinfo(p.hostname, None)
+              print("getaddrinfo OK — sample results:")
+              for a in ai[:4]:
+                  print("  ", a)
+          except Exception as e:
+              print("getaddrinfo ERROR:", repr(e), file=sys.stderr)
+              sys.exit(3)
+          PY
+
       - name: Install deps
         run: pip install -r requirements.txt
+
       - name: Scrape & load
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          LA_URL: https://19hz.info/eventlisting_LosAngeles.php
+          LA_URL: "https://19hz.info/eventlisting_LosAngeles.php"
           USER_AGENT: "EDM-Pulse-Scraper/0.1 (contact: cahughes95@gmail.com)"
         run: python -m src.runners.run_weekly_events
