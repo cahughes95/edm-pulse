@@ -1,7 +1,11 @@
+import os
 from ..config import settings
 from ..utils import html
 from ..parsers.events_la import parse
 from ..db import conn, upsert_venue
+
+LA_URL = os.getenv("LA_URL", "https://19hz.info/eventlisting_LosAngeles.php")
+UA = os.getenv("USER_AGENT", "EDM-Pulse-Scraper/0.1")
 
 def upsert_event(c, ev):
     with c.cursor() as cur:
@@ -20,8 +24,10 @@ def upsert_event(c, ev):
             tags=excluded.tags,
             scraped_at=now()
           returning event_id
-        """, (ev["external_uid"], ev["title"], ev["start_ts"], ev["end_ts"], venue_id,
-              ev["price_min"], ev["price_max"], ev["age_restriction"], ev["tags"], ev["source_url"]))
+        """, (
+            ev["external_uid"], ev["title"], ev["start_ts"], ev["end_ts"], venue_id,
+            ev["price_min"], ev["price_max"], ev["age_restriction"], ev["tags"], ev["source_url"]
+        ))
         event_id = cur.fetchone()[0]
         for url in ev["links"]:
             cur.execute("""
@@ -30,16 +36,19 @@ def upsert_event(c, ev):
             """, (event_id, "alt", url))
 
 def main():
-    html_text = html.get(settings.la_url)
-    items = list(parse(html_text, settings.la_url))
+    html_text = html.get(LA_URL, headers={"User-Agent": UA})
+    items = list(parse(html_text, LA_URL))
     with conn() as c, c.transaction():
         upserts = 0
         for ev in items:
             upsert_event(c, ev)
             upserts += 1
         with c.cursor() as cur:
-            cur.execute("insert into scrape_runs(run_type, rows_parsed, rows_upserted) values('weekly_events', %s, %s)",
-                        (len(items), upserts))
+            cur.execute("""
+                insert into scrape_runs(run_type, rows_parsed, rows_upserted)
+                values('weekly_events', %s, %s)
+            """, (len(items), upserts))
+    print(f"Parsed {len(items)} row(s), upserted {upserts}.")
 
 if __name__ == "__main__":
     main()

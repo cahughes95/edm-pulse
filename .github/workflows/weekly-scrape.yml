@@ -1,7 +1,7 @@
 name: weekly-scrape
 on:
   schedule:
-    - cron: "0 17 * * MON" # ~09:00 Los Angeles during Standard Time
+    - cron: "0 17 * * MON"   # ~09:00 Los Angeles during Standard Time
   workflow_dispatch: {}
 jobs:
   run:
@@ -16,5 +16,5 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           LA_URL: https://19hz.info/eventlisting_LosAngeles.php
-          USER_AGENT: LA-EDM-Scraper/0.1 (contact: you@example.com)
+          USER_AGENT: EDM-Pulse-Scraper/0.1 (contact: you@example.com)
         run: python -m src.runners.run_weekly_events
